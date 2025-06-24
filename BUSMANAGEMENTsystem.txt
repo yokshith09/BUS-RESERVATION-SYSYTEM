@@ -1,0 +1,146 @@
+import sys
+from collections import deque
+
+# Class to represent a Bus
+class Bus:
+    def __init__(self, bus_id, route, capacity):
+        self.bus_id = bus_id
+        self.route = route  # Dictionary to store the route information
+        self.capacity = capacity
+        self.seats = [0] * capacity  # 0 means seat is available, 1 means booked
+        self.waiting_list = deque()  # Queue for waiting passengers
+        self.passenger_list = {}  # Dictionary to store booked passengers
+
+    # Method to display available seats
+    def display_seats(self):
+        available_seats = [i + 1 for i, seat in enumerate(self.seats) if seat == 0]
+        if available_seats:
+            print(f"Available seats for Bus {self.bus_id}: {available_seats}")
+        else:
+            print(f"Bus {self.bus_id} is fully booked.")
+
+    # Method to book a seat
+    def book_seat(self, passenger_name):
+        if 0 in self.seats:  # Check if any seat is available
+            seat_number = self.seats.index(0)  # Find the first available seat
+            self.seats[seat_number] = 1
+            self.passenger_list[seat_number + 1] = passenger_name
+            print(f"Seat {seat_number + 1} has been booked for {passenger_name} on Bus {self.bus_id}.")
+        else:
+            print(f"Bus {self.bus_id} is fully booked. {passenger_name} added to waiting list.")
+            self.waiting_list.append(passenger_name)
+
+    # Method to cancel a booking
+    def cancel_seat(self, seat_number):
+        if self.seats[seat_number - 1] == 1:
+            print(f"Booking for Seat {seat_number} has been canceled.")
+            passenger = self.passenger_list.pop(seat_number)
+            self.seats[seat_number - 1] = 0
+            if self.waiting_list:
+                next_passenger = self.waiting_list.popleft()
+                self.book_seat(next_passenger)
+            print(f"{passenger}'s seat is now available.")
+        else:
+            print(f"Seat {seat_number} is not booked.")
+
+    # Method to display passenger details
+    def display_passengers(self):
+        if self.passenger_list:
+            print(f"Passengers on Bus {self.bus_id}:")
+            for seat, passenger in self.passenger_list.items():
+                print(f"Seat {seat}: {passenger}")
+        else:
+            print(f"No passengers on Bus {self.bus_id}.")
+
+
+# Class to manage the bus system
+class BusSystem:
+    def __init__(self):
+        self.buses = {}  # Dictionary to store buses (bus_id: Bus object)
+
+    # Add a bus to the system
+    def add_bus(self, bus_id, route, capacity):
+        if bus_id in self.buses:
+            print(f"Bus with ID {bus_id} already exists.")
+        else:
+            new_bus = Bus(bus_id, route, capacity)
+            self.buses[bus_id] = new_bus
+            print(f"Bus {bus_id} added with route {route} and capacity {capacity}.")
+
+    # Book a seat on a specific bus
+    def book_seat(self, bus_id, passenger_name):
+        if bus_id in self.buses:
+            self.buses[bus_id].book_seat(passenger_name)
+        else:
+            print(f"Bus with ID {bus_id} not found.")
+
+    # Cancel a booking on a specific bus
+    def cancel_seat(self, bus_id, seat_number):
+        if bus_id in self.buses:
+            self.buses[bus_id].cancel_seat(seat_number)
+        else:
+            print(f"Bus with ID {bus_id} not found.")
+
+    # Display available seats on a specific bus
+    def display_seats(self, bus_id):
+        if bus_id in self.buses:
+            self.buses[bus_id].display_seats()
+        else:
+            print(f"Bus with ID {bus_id} not found.")
+
+    # Display all passengers on a specific bus
+    def display_passengers(self, bus_id):
+        if bus_id in self.buses:
+            self.buses[bus_id].display_passengers()
+        else:
+            print(f"Bus with ID {bus_id} not found.")
+
+
+# Main function to demonstrate the bus reservation system
+def main():
+    system = BusSystem()
+
+    while True:
+        print("\n--- Bus Reservation System Menu ---")
+        print("1. Add Bus")
+        print("2. Book Seat")
+        print("3. Cancel Booking")
+        print("4. Display Available Seats")
+        print("5. Display Passengers")
+        print("6. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            bus_id = input("Enter Bus ID: ")
+            route = input("Enter route (From-To): ")
+            capacity = int(input("Enter bus capacity: "))
+            system.add_bus(bus_id, route, capacity)
+
+        elif choice == "2":
+            bus_id = input("Enter Bus ID: ")
+            passenger_name = input("Enter Passenger Name: ")
+            system.book_seat(bus_id, passenger_name)
+
+        elif choice == "3":
+            bus_id = input("Enter Bus ID: ")
+            seat_number = int(input("Enter Seat Number to Cancel: "))
+            system.cancel_seat(bus_id, seat_number)
+
+        elif choice == "4":
+            bus_id = input("Enter Bus ID: ")
+            system.display_seats(bus_id)
+
+        elif choice == "5":
+            bus_id = input("Enter Bus ID: ")
+            system.display_passengers(bus_id)
+
+        elif choice == "6":
+            print("Exiting system. Goodbye!")
+            sys.exit()
+
+        else:
+            print("Invalid choice. Please try again.")
+
+
+if __name__ == "__main__":
+    main()
